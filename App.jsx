@@ -1,12 +1,22 @@
-import React from 'react'
-import { View , Text} from 'react-native'
+import React from 'react';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { NativeBaseProvider, Box, Text } from 'native-base';
+import LoginPage from './src/screens/login';
+import customTheme from './src/theme';
+import AppNavigator from './src/navigations/AppNavigator';
+
 
 const App = () => {
   return (
- <View>
-  <Text>Hello World</Text>
- </View>
-  )
-}
+    <SafeAreaProvider>
+      <NativeBaseProvider theme={customTheme}>
+        <AppNavigator />
+        {/* <LoginPage /> */}
+        {/* <Text>Hellow</Text> */}
+       {/* <LoginScreen /> */}
+      </NativeBaseProvider>
+    </SafeAreaProvider>
+  );
+};
 
-export default App
+export default App;
