@@ -18,6 +18,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import axiosInstance from '../../axios/axiosInstance';
 
 const validationSchema = Yup.object().shape({
+  name: Yup.string().required('Name is required'),
   username: Yup.string()
     .min(3, 'Username must be at least 3 characters')
     .required('Username is required'),
@@ -26,20 +27,20 @@ const validationSchema = Yup.object().shape({
     .required('Email is required'),
   phone: Yup.string()
     // .phone('Invalid phone number')
-    .required('Phone No is required'),
+    .required('Phone No is required') ,
   password: Yup.string()
     .min(6, 'Password must be at least 6 characters')
     .required('Password is required'),
 });
 
 const Signup = ({navigation}) => {
-  const [keepLoggedIn, setKeepLoggedIn] = useState(false);
+  // const [keepLoggedIn, setKeepLoggedIn] = useState(false);
 
   const handleSignup = async (values, {resetForm}) => {
     try {
       const response = await axiosInstance.post('/api/auth/signup', values);
       console.log('Signup successful:', response.data.data);
-
+        navigation.navigate('Login')
       Toast.show({
         title: response.data.message || 'Login successful',
         status: 'success',
@@ -80,21 +81,22 @@ const Signup = ({navigation}) => {
         bottom={0}
         borderTopLeftRadius="65px"
         borderTopRightRadius="65px"
+        backgroundColor='primary.800'
         shadow={2}>
         <ScrollView
           contentContainerStyle={{flexGrow: 1}}
           showsVerticalScrollIndicator={false}>
           <Text
-            color="primary.500"
+            color="primary.700"
             fontSize="heading1"
             fontWeight="bold"
             mx="auto"
             my="20px">
-            Welcome Back 👋
+            Signup
           </Text>
 
           <Formik
-            initialValues={{username: '', email: '', phone: '', password: ''}}
+            initialValues={{name: '', username: '', email: '', phone: '', password: ''}}
             validationSchema={validationSchema}
             onSubmit={handleSignup}>
             {({
@@ -106,7 +108,29 @@ const Signup = ({navigation}) => {
               touched,
             }) => (
               <>
-                <Text my={0} fontSize="bodyText2" fontWeight="semibold" mb={3}>
+               <Text fontSize="bodyText2" fontWeight="semibold" mb={3}>
+                  Full Name
+                </Text>
+                <Input
+                  placeholder="Enter Your Name"
+                  borderRadius="10px"
+                  onChangeText={handleChange('name')}
+                  onBlur={handleBlur('name')}
+                  value={values.name}
+                  backgroundColor="chatBubble.200"
+                  variant="outline"
+                  borderColor={
+                    errors.name && touched.name
+                      ? 'red.500'
+                      : 'accent.100'
+                  }
+                />
+                {errors.name && touched.name && (
+                  <Text color="red.500" fontSize="xs">
+                    {errors.name}
+                  </Text>
+                )}
+                <Text fontSize="bodyText2" fontWeight="semibold" my={3}>
                   Username
                 </Text>
                 <Input
@@ -204,11 +228,11 @@ const Signup = ({navigation}) => {
                 <Button
                   onPress={handleSubmit}
                   mt="30px"
-                  backgroundColor="primary.500"
+                  backgroundColor="primary.900"
                   borderRadius="50px"
                   py={3}>
                   <Text
-                    color="primary.50"
+                    color="white"
                     fontSize="subHeading2"
                     fontWeight="semibold">
                     Signup
@@ -218,7 +242,7 @@ const Signup = ({navigation}) => {
                   Already have an account?
                   <Text
                     ml="5px"
-                    color="primary.500"
+                    color="primary.900"
                     onPress={() => navigation.navigate('Login')}>
                     Login
                   </Text>
@@ -227,7 +251,7 @@ const Signup = ({navigation}) => {
                 <Text
                   mx="auto"
                   fontSize="subHeading1"
-                  color="primary.200"
+                  color="primary.600"
                   my="14px">
                   OR
                 </Text>
@@ -238,7 +262,7 @@ const Signup = ({navigation}) => {
                   py={3}
                   mb="20px">
                   <Text
-                    color="primary.200"
+                    color="primary.700"
                     fontSize="subHeading2"
                     fontWeight="semibold">
                     Login with Google

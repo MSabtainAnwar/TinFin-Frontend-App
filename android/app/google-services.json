@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "888823110001",
+    "project_id": "tinfin-3fbf1",
+    "storage_bucket": "tinfin-3fbf1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:888823110001:android:361159da96cf6220b57ed0",
+        "android_client_info": {
+          "package_name": "com.tinfinfrontendapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBQfNRSNAZtcQ31m9wBRKWb6_1mCRfZ-ik"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
