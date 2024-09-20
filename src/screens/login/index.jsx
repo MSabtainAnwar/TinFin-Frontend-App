@@ -1,22 +1,13 @@
-import {
-  View,
-  Box,
-  Center,
-  Text,
-  Input,
-  Button,
-  Toast,
-  Checkbox,
-  HStack,
-  // Icon,
-} from 'native-base';
-import React, {useState} from 'react';
-import {Image, StyleSheet, TouchableOpacity} from 'react-native';
-import {Formik} from 'formik';
+import { View, Box, Center, Text, Input, Button, Toast, Checkbox, HStack } from 'native-base';
+import React, { useState } from 'react';
+import { Image, StyleSheet, TouchableOpacity } from 'react-native';
+import { Formik } from 'formik';
 import * as Yup from 'yup';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axiosInstance from '../../axios/axiosInstance';
-import Icon from 'react-native-vector-icons/MaterialIcons'; // Import icons from react-native-vector-icons
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useDispatch } from 'react-redux';
+import { setAuthUsers } from '../../redux/slices/userSlice';
 
 const validationSchema = Yup.object().shape({
   email: Yup.string()
@@ -27,16 +18,18 @@ const validationSchema = Yup.object().shape({
     .required('Password is required'),
 });
 
-const LoginPage = ({navigation}) => {
+const LoginPage = ({ navigation }) => {
   const [keepLoggedIn, setKeepLoggedIn] = useState(false);
-  const [showPassword, setShowPassword] = useState(false); // State for toggling password visibility
+  const [showPassword, setShowPassword] = useState(false);
+  const dispatch = useDispatch();
 
-  const handleLogin = async (values, {resetForm}) => {
+  const handleLogin = async (values, { resetForm }) => {
     try {
       const response = await axiosInstance.post('/api/auth/login', values);
       console.log('Login successful:', response.data.data);
 
       await AsyncStorage.setItem('userToken', response.data.data.user.token);
+      dispatch(setAuthUsers(response.data.data.user))
 
       Toast.show({
         title: response.data.message || 'Login successful',
@@ -44,6 +37,7 @@ const LoginPage = ({navigation}) => {
         duration: 3000,
       });
 
+      // Navigate to Home screen after login
       navigation.navigate('Home');
       resetForm();
     } catch (error) {
@@ -79,20 +73,24 @@ const LoginPage = ({navigation}) => {
         bottom={0}
         borderTopLeftRadius="65px"
         borderTopRightRadius="65px"
-        shadow={2}>
+        shadow={2}
+        backgroundColor="primary.800"
+      >
         <Text
-          color="primary.500"
+          color="primary.700"
           fontSize="heading1"
           fontWeight="bold"
           mx="auto"
-          my="20px">
+          my="20px"
+        >
           Welcome Back 👋
         </Text>
 
         <Formik
-          initialValues={{email: '', password: ''}}
+          initialValues={{ email: '', password: '' }}
           validationSchema={validationSchema}
-          onSubmit={handleLogin}>
+          onSubmit={handleLogin}
+        >
           {({
             handleChange,
             handleBlur,
@@ -113,9 +111,7 @@ const LoginPage = ({navigation}) => {
                 value={values.email}
                 backgroundColor="chatBubble.200"
                 variant="outline"
-                borderColor={
-                  errors.email && touched.email ? 'red.500' : 'accent.100'
-                }
+                borderColor={errors.email && touched.email ? 'red.500' : 'accent.100'}
               />
               {errors.email && touched.email && (
                 <Text color="red.500" fontSize="xs">
@@ -129,25 +125,16 @@ const LoginPage = ({navigation}) => {
               <Input
                 placeholder="Password"
                 borderRadius="10px"
-                type={showPassword ? 'text' : 'password'} // Toggle type
+                type={showPassword ? 'text' : 'password'}
                 onChangeText={handleChange('password')}
                 onBlur={handleBlur('password')}
                 value={values.password}
                 backgroundColor="chatBubble.200"
                 variant="outline"
-                borderColor={
-                  errors.password && touched.password ? 'red.500' : 'accent.100'
-                }
+                borderColor={errors.password && touched.password ? 'red.500' : 'accent.100'}
                 InputRightElement={
-                  // Eye toggle button inside the input
-                  <TouchableOpacity
-                    onPress={() => setShowPassword(!showPassword)}>
-                    <Icon
-                      name={showPassword ? 'visibility' : 'visibility-off'}
-                      size={24}
-                      color="muted.400"
-                      style={{marginRight: 10}}
-                    />
+                  <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                    <Icon name={showPassword ? 'visibility' : 'visibility-off'} size={20} color="#333" style={{ marginRight: 10 }} />
                   </TouchableOpacity>
                 }
               />
@@ -161,63 +148,33 @@ const LoginPage = ({navigation}) => {
                 <Checkbox
                   value="keepLoggedIn"
                   isChecked={keepLoggedIn}
-                  onChange={() => setKeepLoggedIn(!keepLoggedIn)}>
-                  <Text color="primary.500" fontSize="xs">
+                  onChange={() => setKeepLoggedIn(!keepLoggedIn)}
+                >
+                  <Text color="primary.700" fontSize="xs">
                     Keep me logged in
                   </Text>
                 </Checkbox>
 
-                <TouchableOpacity
-                  onPress={() => navigation.navigate('ForgotPassword')}>
-                  <Text color="primary.500" fontSize="xs">
+                <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
+                  <Text color="primary.900" fontSize="xs">
                     Forgot Password?
                   </Text>
                 </TouchableOpacity>
               </HStack>
 
-              <Button
-                onPress={handleSubmit}
-                mt="30px"
-                backgroundColor="primary.500"
-                borderRadius="50px"
-                py={3}>
-                <Text
-                  color="primary.50"
-                  fontSize="subHeading2"
-                  fontWeight="semibold">
+              <Button onPress={handleSubmit} mt="30px" backgroundColor="primary.900" borderRadius="50px" py={3}>
+                <Text color="white" fontSize="subHeading2" fontWeight="semibold">
                   Login
                 </Text>
               </Button>
+
+              {/* Signup link */}
               <Text mt="10px" mx="auto">
                 Don't have an account?
-                <Text
-                  ml="5px"
-                  color="primary.500"
-                  onPress={() => navigation.navigate('Signup')}>
+                <Text ml="5px" color="primary.900" onPress={() => navigation.navigate('Signup')}>
                   Sign up
                 </Text>
               </Text>
-
-              <Text
-                mx="auto"
-                fontSize="subHeading1"
-                color="primary.200"
-                my="14px">
-                OR
-              </Text>
-
-              <Button
-                backgroundColor="chatBubble.200"
-                borderRadius="50px"
-                py={3}
-                mb="15px">
-                <Text
-                  color="primary.200"
-                  fontSize="subHeading2"
-                  fontWeight="semibold">
-                  Login with Google
-                </Text>
-              </Button>
             </>
           )}
         </Formik>
@@ -231,10 +188,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   background: {
-    position: 'static',
     width: '100%',
     height: '100%',
-    resizeMode: 'cover',
+    position: 'absolute',
   },
 });
 

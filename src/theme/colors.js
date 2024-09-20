@@ -1,10 +1,16 @@
 // theme/colors.js
 const colors = {
     primary: {
-      50: '#FAF9F6', // Lightest shade (for backgrounds)
-      100: '#FFD700', // Bright yellow
-      200: '#333333', //gray for fonts
-      500: '#001F3F', // Dark navy blue
+      700: '#333333', //gray for fonts
+      600: '#686868',
+      500: "#ADADAD",
+      400: '#D4D4D4',
+      300: '#EBEBEB',
+      200: '#F4F4F4',
+      800: '#FAF9F6',
+      900: '#001F3F',
+      1000: '#FFD700',
+
 
     },
     accent: {

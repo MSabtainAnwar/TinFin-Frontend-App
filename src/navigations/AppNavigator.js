@@ -6,20 +6,25 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import LoginPage from '../screens/login/index'; 
 import HomePage from '../screens/home/index'; 
 import Signup from '../screens/signup';
+import AddFriendPage from '../screens/addConnection';
+import { useSelector } from 'react-redux';
+import FriendRequests from '../screens/friendRequests';
 
 const Stack = createStackNavigator();
 
 const AppNavigator = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  // Get the user from Redux
+  const user = useSelector((state) => state.user.users);
 
   useEffect(() => {
     const checkLoginStatus = async () => {
       try {
-        const token = await AsyncStorage.getItem('userToken');
-        if (token) {
+        if (user && user.token) {
           setIsLoggedIn(true);
-        }
+        } 
       } catch (error) {
         console.log('Error checking login status:', error);
       } finally {
@@ -28,11 +33,10 @@ const AppNavigator = () => {
     };
 
     checkLoginStatus();
-  }, []);
+  }, [user]); 
 
   if (isLoading) {
     return (
-      // You can replace this with your own loading spinner or placeholder
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" color="#0000ff" />
       </View>
@@ -43,21 +47,34 @@ const AppNavigator = () => {
     <NavigationContainer>
       <Stack.Navigator>
         {isLoggedIn ? (
+          <>
           <Stack.Screen
             name="Home"
             component={HomePage}
-            options={{ title: 'Home' }}
+            options={{ headerShown: false }}
           />
+             <Stack.Screen
+            name="AddFriend"
+            component={AddFriendPage}
+            options={{ headerShown: false }}
+          />
+              <Stack.Screen
+            name="Friends"
+            component={FriendRequests}
+            options={{ headerShown: false }}
+          />
+          </>
+
         ) : (
           <>
             <Stack.Screen
-              name="Signup"
-              component={Signup}
+              name="Login"
+              component={LoginPage}
               options={{ headerShown: false }}
             />
             <Stack.Screen
-              name="Login"
-              component={LoginPage}
+              name="Signup"
+              component={Signup}
               options={{ headerShown: false }}
             />
           </>
