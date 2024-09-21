@@ -9,6 +9,7 @@ import {
   ScrollView,
   Checkbox,
   HStack,
+  Spinner,
 } from 'native-base';
 import React, {useState} from 'react';
 import {Image, StyleSheet, TouchableOpacity} from 'react-native';
@@ -27,7 +28,7 @@ const validationSchema = Yup.object().shape({
     .required('Email is required'),
   phone: Yup.string()
     // .phone('Invalid phone number')
-    .required('Phone No is required') ,
+    .required('Phone No is required'),
   password: Yup.string()
     .min(6, 'Password must be at least 6 characters')
     .required('Password is required'),
@@ -35,19 +36,22 @@ const validationSchema = Yup.object().shape({
 
 const Signup = ({navigation}) => {
   // const [keepLoggedIn, setKeepLoggedIn] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSignup = async (values, {resetForm}) => {
+    setIsLoading(true);
     try {
       const response = await axiosInstance.post('/api/auth/signup', values);
       console.log('Signup successful:', response.data.data);
-        navigation.navigate('Login')
+      navigation.navigate('Login');
       Toast.show({
         title: response.data.message || 'Login successful',
         status: 'success',
         duration: 3000,
       });
 
-      resetForm();s
+      resetForm();
+      s;
     } catch (error) {
       console.error('Login error:', error.response?.data || error.message);
 
@@ -56,6 +60,8 @@ const Signup = ({navigation}) => {
         status: 'error',
         duration: 3000,
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -81,7 +87,7 @@ const Signup = ({navigation}) => {
         bottom={0}
         borderTopLeftRadius="65px"
         borderTopRightRadius="65px"
-        backgroundColor='primary.800'
+        backgroundColor="primary.800"
         shadow={2}>
         <ScrollView
           contentContainerStyle={{flexGrow: 1}}
@@ -96,7 +102,13 @@ const Signup = ({navigation}) => {
           </Text>
 
           <Formik
-            initialValues={{name: '', username: '', email: '', phone: '', password: ''}}
+            initialValues={{
+              name: '',
+              username: '',
+              email: '',
+              phone: '',
+              password: '',
+            }}
             validationSchema={validationSchema}
             onSubmit={handleSignup}>
             {({
@@ -108,7 +120,7 @@ const Signup = ({navigation}) => {
               touched,
             }) => (
               <>
-               <Text fontSize="bodyText2" fontWeight="semibold" mb={3}>
+                <Text fontSize="bodyText2" fontWeight="semibold" mb={3}>
                   Full Name
                 </Text>
                 <Input
@@ -120,9 +132,7 @@ const Signup = ({navigation}) => {
                   backgroundColor="chatBubble.200"
                   variant="outline"
                   borderColor={
-                    errors.name && touched.name
-                      ? 'red.500'
-                      : 'accent.100'
+                    errors.name && touched.name ? 'red.500' : 'accent.100'
                   }
                 />
                 {errors.name && touched.name && (
@@ -224,20 +234,34 @@ const Signup = ({navigation}) => {
                     {errors.password}
                   </Text>
                 )}
-
                 <Button
                   onPress={handleSubmit}
                   mt="30px"
                   backgroundColor="primary.900"
                   borderRadius="50px"
-                  py={3}>
-                  <Text
-                    color="white"
-                    fontSize="subHeading2"
-                    fontWeight="semibold">
-                    Signup
-                  </Text>
+                  py={3}
+                  disabled={isLoading} // Disable the button while loading
+                >
+                  {isLoading ? (
+                    <HStack space={2} justifyContent="center">
+                      <Spinner color="white" />
+                      <Text
+                        color="white"
+                        fontSize="subHeading2"
+                        fontWeight="semibold">
+                        Loading...
+                      </Text>
+                    </HStack>
+                  ) : (
+                    <Text
+                      color="white"
+                      fontSize="subHeading2"
+                      fontWeight="semibold">
+                      Signup
+                    </Text>
+                  )}
                 </Button>
+
                 <Text mt="10px" mx="auto">
                   Already have an account?
                   <Text
