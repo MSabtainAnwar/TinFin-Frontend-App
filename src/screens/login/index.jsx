@@ -1,4 +1,4 @@
-import { View, Box, Center, Text, Input, Button, Toast, Checkbox, HStack } from 'native-base';
+import { View, Box, Center, Text, Input, Button, Toast, Checkbox, HStack, Spinner } from 'native-base';
 import React, { useState } from 'react';
 import { Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { Formik } from 'formik';
@@ -21,15 +21,17 @@ const validationSchema = Yup.object().shape({
 const LoginPage = ({ navigation }) => {
   const [keepLoggedIn, setKeepLoggedIn] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
 
   const handleLogin = async (values, { resetForm }) => {
+    setIsLoading(true);
     try {
       const response = await axiosInstance.post('/api/auth/login', values);
       console.log('Login successful:', response.data.data);
 
       await AsyncStorage.setItem('userToken', response.data.data.user.token);
-      dispatch(setAuthUsers(response.data.data.user))
+      dispatch(setAuthUsers(response.data.data.user));
 
       Toast.show({
         title: response.data.message || 'Login successful',
@@ -37,17 +39,17 @@ const LoginPage = ({ navigation }) => {
         duration: 3000,
       });
 
-      // Navigate to Home screen after login
       navigation.navigate('Home');
       resetForm();
     } catch (error) {
       console.error('Login error:', error.response?.data || error.message);
-
       Toast.show({
         title: error.response?.data?.message || 'Login Failed',
         status: 'error',
         duration: 3000,
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -162,13 +164,28 @@ const LoginPage = ({ navigation }) => {
                 </TouchableOpacity>
               </HStack>
 
-              <Button onPress={handleSubmit} mt="30px" backgroundColor="primary.900" borderRadius="50px" py={3}>
-                <Text color="white" fontSize="subHeading2" fontWeight="semibold">
-                  Login
-                </Text>
+              <Button
+                onPress={handleSubmit}
+                mt="30px"
+                backgroundColor="primary.900"
+                borderRadius="50px"
+                py={3}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <HStack space={2} justifyContent="center">
+                    <Spinner color="white" />
+                    <Text color="white" fontSize="subHeading2" fontWeight="semibold">
+                      Loading...
+                    </Text>
+                  </HStack>
+                ) : (
+                  <Text color="white" fontSize="subHeading2" fontWeight="semibold">
+                    Login
+                  </Text>
+                )}
               </Button>
 
-              {/* Signup link */}
               <Text mt="10px" mx="auto">
                 Don't have an account?
                 <Text ml="5px" color="primary.900" onPress={() => navigation.navigate('Signup')}>

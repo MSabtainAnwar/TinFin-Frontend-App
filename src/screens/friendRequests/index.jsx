@@ -9,16 +9,19 @@ import {
   Image,
   useToast,
   ScrollView,
+  Spinner
 } from 'native-base';
 import { StyleSheet, ImageBackground } from 'react-native';
 import axiosInstance from '../../axios/axiosInstance';
 import { useDispatch, useSelector } from 'react-redux';
-import { addFriend } from '../../redux/slices/userSlice'; 
+import { addFriend, setFriends, setFriendsReq } from '../../redux/slices/userSlice'; 
 
 const FriendRequests = () => {
   const [friendRequests, setFriendRequests] = useState([]);
   const [acceptedRequests, setAcceptedRequests] = useState([]);
+  const [loading , setLoading ] = useState(false);
   const user = useSelector(state => state.user.users);
+  // const friends = useSelector(state => state.user.friendRequests);
   const dispatch = useDispatch(); 
   const toast = useToast();
 
@@ -28,6 +31,7 @@ const FriendRequests = () => {
         `/api/users/${user._id}/friend-requests`,
       );
       setFriendRequests(response.data);
+      dispatch(setFriendsReq(response.data));
     } catch (error) {
       console.error('Error fetching friend requests:', error.response ? error.response.data : error.message);
     }
@@ -37,25 +41,27 @@ const FriendRequests = () => {
     fetchFriendRequests();
   }, []);
 
-  const acceptFriendRequest = async friendId => {
+  const acceptFriendRequest = async (friendId) => {
+    setLoading(friendId)
     try {
-      const response = await axiosInstance.post(
-        '/api/users/accept-friend-request',
-        {
-          userId: user._id,
-          friendId: friendId,
-        },
-      );
-
+      const response = await axiosInstance.post('/api/users/accept-friend-request', {
+        userId: user._id,
+        friendId: friendId,
+      });
+  
       if (response.status === 200) {
-        const acceptedFriend = response.data; 
         setAcceptedRequests([...acceptedRequests, friendId]);
-        dispatch(addFriend(acceptedFriend)); 
+  
+        const friendsResponse = await axiosInstance.get(`/api/users/${user._id}/friends`);
+        dispatch(setFriends(friendsResponse.data)); 
+  
         toast.show({
           title: 'Request Accepted!',
           status: 'success',
           description: 'Friend request accepted successfully.',
         });
+  
+        fetchFriendRequests(); 
       }
     } catch (error) {
       console.error('Error accepting friend request:', error.response ? error.response.data : error.message);
@@ -63,8 +69,21 @@ const FriendRequests = () => {
         status: 'error',
         description: 'Unable to accept friend request!',
       });
+    }finally{
+      setLoading(null)
     }
   };
+  
+  
+  // const fetchFriends = async () => {
+  //   try {
+  //     const response = await axiosInstance.get(`/api/users/${user._id}/friends`);
+  //     dispatch(setFriends(response.data));
+  //   } catch (error) {
+  //     console.error('Error fetching friends:', error.message);
+  //   }
+  // };
+  
 
   return (
     <ImageBackground
@@ -81,7 +100,6 @@ const FriendRequests = () => {
         <ScrollView
         contentContainerStyle={{flexGrow: 1}}
           showsVerticalScrollIndicator={false}>
-
         <VStack space={4} mt={5}>
           {friendRequests.map(request => (
             <HStack
@@ -107,18 +125,25 @@ const FriendRequests = () => {
                   </Text>
                 </View>
               </HStack>
-
-              <Button
-                borderRadius="20px"
-                backgroundColor={
-                  acceptedRequests.includes(request._id) ? 'primary.700' : 'primary.900'
-                }
-                _text={{ color: 'white', fontWeight: 'bold' }}
-                px="20px"
-                onPress={() => acceptFriendRequest(request._id)}
-                isDisabled={acceptedRequests.includes(request._id)}>
-                {acceptedRequests.includes(request._id) ? 'Accepted' : 'Accept'}
-              </Button>
+              {
+                loading === request._id ? (
+                  <Spinner size="small" color="white" />
+                ) :
+                (
+                  <Button
+                  borderRadius="20px"
+                  backgroundColor={
+                    acceptedRequests.includes(request._id) ? 'primary.900' : 'primary.900'
+                  }
+                  _text={{ color: 'white', fontWeight: 'bold' }}
+                  px="20px"
+                  onPress={() => acceptFriendRequest(request._id)}
+                  isDisabled={acceptedRequests.includes(request._id)}>
+                  {acceptedRequests.includes(request._id) ? 'Accepted' : 'Accept'}
+                </Button>
+                )
+              }
+             
             </HStack>
           ))}
         </VStack>
