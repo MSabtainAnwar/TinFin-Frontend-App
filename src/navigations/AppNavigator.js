@@ -8,6 +8,7 @@ import HomePage from '../screens/home/index';
 import Signup from '../screens/signup';
 import AddFriendPage from '../screens/addConnection';
 import FriendRequests from '../screens/friendRequests';
+import ChatPage from '../screens/chat';
 
 const Stack = createStackNavigator();
 
@@ -56,6 +57,11 @@ const AppNavigator = () => {
             <Stack.Screen
               name="Friends"
               component={FriendRequests}
+              options={{ headerShown: false }}
+            />
+              <Stack.Screen
+              name="Chat"
+              component={ChatPage}
               options={{ headerShown: false }}
             />
           </>

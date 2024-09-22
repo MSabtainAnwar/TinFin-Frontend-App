@@ -1,14 +1,27 @@
-import React, { useState, useEffect } from 'react';
-import { View, Input, Button, HStack, Box, ScrollView, Text } from 'native-base';
-import { useDispatch, useSelector } from 'react-redux';
-import { setAuthUsers, setFriends, setFriendsReq } from '../../redux/slices/userSlice'; // Add setFriendsReq
+import React, {useState, useEffect} from 'react';
+import {
+  View,
+  Input,
+  Button,
+  HStack,
+  Box,
+  ScrollView,
+  Text,
+  Pressable,
+} from 'native-base';
+import {useDispatch, useSelector} from 'react-redux';
+import {
+  setAuthUsers,
+  setFriends,
+  setFriendsReq,
+} from '../../redux/slices/userSlice'; // Add setFriendsReq
 import axiosInstance from '../../axios/axiosInstance';
 import TopNav from '../../components/TopNav/index';
-import { Image, StyleSheet } from 'react-native';
+import {Image, StyleSheet} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import FriendPlaceholder from '../../components/Placeholder/index'; 
+import FriendPlaceholder from '../../components/Placeholder/index';
 
-const HomePage = ({ navigation }) => {
+const HomePage = ({navigation}) => {
   const dispatch = useDispatch();
   const user = useSelector(state => state.user.users);
   const friendsData = useSelector(state => state.user.friends);
@@ -19,17 +32,19 @@ const HomePage = ({ navigation }) => {
 
   useEffect(() => {
     const fetchFriends = async () => {
-      setLoading(true); 
+      setLoading(true);
       try {
         if (user && user._id) {
-          const response = await axiosInstance.get(`/api/users/${user._id}/friends`);
-          dispatch(setFriends(response.data)); 
-          setFilteredFriends(response.data); 
+          const response = await axiosInstance.get(
+            `/api/users/${user._id}/friends`,
+          );
+          dispatch(setFriends(response.data));
+          setFilteredFriends(response.data);
         }
       } catch (error) {
         console.error('Error fetching friends:', error);
       } finally {
-        setLoading(false); 
+        setLoading(false);
       }
     };
 
@@ -40,7 +55,9 @@ const HomePage = ({ navigation }) => {
     const fetchFriendRequests = async () => {
       try {
         if (user && user._id) {
-          const response = await axiosInstance.get(`/api/users/${user._id}/friend-requests`);
+          const response = await axiosInstance.get(
+            `/api/users/${user._id}/friend-requests`,
+          );
           dispatch(setFriendsReq(response.data));
         }
       } catch (error) {
@@ -55,14 +72,14 @@ const HomePage = ({ navigation }) => {
     if (searchTerm) {
       const regex = new RegExp(searchTerm, 'i');
       setFilteredFriends(
-        friendsData.filter(friend => friend.username.match(regex) || friend.name.match(regex)),
+        friendsData.filter(
+          friend => friend.username.match(regex) || friend.name.match(regex),
+        ),
       );
     } else {
       setFilteredFriends(friendsData);
     }
-  }, [searchTerm, friendsData]); 
-
-
+  }, [searchTerm, friendsData]);
 
   return (
     <View flex={1} px={5}>
@@ -107,38 +124,47 @@ const HomePage = ({ navigation }) => {
       </Box>
 
       <ScrollView
-        contentContainerStyle={{ flexGrow: 1 }}
+        contentContainerStyle={{flexGrow: 1}}
         showsVerticalScrollIndicator={false}>
         {loading ? (
-          Array.from({ length: 5 }).map((_, index) => (
-            <FriendPlaceholder key={index} /> 
+          Array.from({length: 5}).map((_, index) => (
+            <FriendPlaceholder key={index} />
           ))
         ) : filteredFriends.length > 0 ? (
           filteredFriends.map((friend, index) => (
-            <Box
+            // HomePage.js
+
+            <Pressable
               key={index}
-              width="100%"
-              backgroundColor="white"
-              my="5px"
-              p="15px"
-              borderRadius="10px">
-              <HStack justifyContent="space-between">
-                <HStack space={3} alignItems="center">
-                  <Image
-                    source={require('../../assets/images/IMG_1040~2.jpg')}
-                    style={styles.chatImage}
-                  />
-                  <View>
-                    <Text fontSize="16px" fontWeight="bold" color="primary.700">
-                      {friend.name}
-                    </Text>
-                    <Text fontSize="14px" color="primary.500">
-                      {friend.username}
-                    </Text>
-                  </View>
+              onPress={() => navigation.navigate('Chat', {friend})} // Pass friend data to Chat page
+            >
+              <Box
+                width="100%"
+                backgroundColor="white"
+                my="5px"
+                p="15px"
+                borderRadius="10px">
+                <HStack justifyContent="space-between">
+                  <HStack space={3} alignItems="center">
+                    <Image
+                      source={require('../../assets/images/IMG_1040~2.jpg')}
+                      style={styles.chatImage}
+                    />
+                    <View>
+                      <Text
+                        fontSize="16px"
+                        fontWeight="bold"
+                        color="primary.700">
+                        {friend.name}
+                      </Text>
+                      <Text fontSize="14px" color="primary.500">
+                        {friend.username}
+                      </Text>
+                    </View>
+                  </HStack>
                 </HStack>
-              </HStack>
-            </Box>
+              </Box>
+            </Pressable>
           ))
         ) : (
           <Text>No friends found.</Text>

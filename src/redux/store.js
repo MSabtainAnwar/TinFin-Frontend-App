@@ -3,6 +3,8 @@ import { combineReducers, configureStore } from '@reduxjs/toolkit';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { persistStore, persistReducer } from 'redux-persist';
 import userSlice from './slices/userSlice';
+// import socketSlice from './slices/socketSlice';
+import chatSlice from './slices/chatSlice';
 
 const persistConfig = {
   key: 'root',
@@ -10,8 +12,10 @@ const persistConfig = {
 };
 
 const rootReducer = combineReducers({
-  user: userSlice, 
-});
+  user: userSlice,
+  // socket: socketSlice,
+  chat: chatSlice
+}); 
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
